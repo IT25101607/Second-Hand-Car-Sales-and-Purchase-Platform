@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Listing – Second Hand Car Platform</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 1.8rem;
+      align-items: start;
+    }
+
+    /* Read-only info strip */
+    .readonly-strip {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .ro-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .ro-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); font-weight: 600; }
+    .ro-val   { font-weight: 700; font-size: 0.95rem; }
+    .ro-sep   { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+    /* Form hint */
+    .form-hint {
+      font-size: 0.77rem;
+      color: var(--text-dim);
+      margin-top: 0.35rem;
+    }
+
+    /* Sidebar summary card */
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .summary-accent {
+      height: 4px;
+      background: var(--grad-btn);
+    }
+    .summary-accent-gold { background: var(--grad-gold); }
+    .summary-accent-cyan { background: linear-gradient(90deg,#06b6d4,#3b82f6); }
+    .summary-body { padding: 1.5rem; }
+
+    .summary-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.85rem;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row-label { color: var(--text-muted); }
+    .summary-row-val   { font-weight: 600; }
+
+    .current-price-box {
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .current-price-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+    .current-price-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--grad-btn);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed rgba(124,58,237,0.4);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: rgba(124,58,237,0.05);
+      margin-bottom: 0.4rem;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: rgba(124,58,237,0.75);
+      background: rgba(124,58,237,0.12);
+    }
+    .drop-zone-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .drop-zone-text { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+    .drop-zone-sub  { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+    @media (max-width: 900px) {
+      .edit-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/cars/{id}(id=${car.carId})}">← Back to Listing</a>
+    <a th:href="@{/cars/my}">📋 My Garage</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>✏️ Edit Listing</h1>
+    <p th:text="'Updating: ' + ${car.brand} + ' ' + ${car.model} + ' (' + ${car.year} + ')'">Updating car</p>
+  </div>
+
+  <div class="edit-grid">
+
+    <!-- Main Form -->
+    <div style="animation:fadeUp 0.5s ease both">
+
+      <!-- Read-only info strip -->
+      <div class="readonly-strip">
+        <div class="ro-item">
+          <span class="ro-label">Car ID</span>
+          <span class="ro-val" th:text="${car.carId}">—</span>
+        </div>
+        <div class="ro-sep"></div>
+        <div class="ro-item">
+          <span class="ro-label">Vehicle</span>
+          <span class="ro-val" th:text="${car.brand} + ' ' + ${car.model}">—</span>
+        </div>
+        <div class="ro-sep"></div>
+        <div class="ro-item">
+          <span class="ro-label">Year</span>
+          <span class="ro-val" th:text="${car.year}">—</span>
+        </div>
+        <div class="ro-sep"></div>
+        <div class="ro-item">
+          <span class="ro-label">Type</span>
+          <span class="ro-val" th:text="${car.type == 'USED_CAR'} ? 'Used' : (${car.type == 'CERTIFIED_CAR'} ? 'Certified' : 'New')">—</span>
+        </div>
+      </div>
+
+      <div class="glass-card" style="padding:2rem">
+        <form th:action="@{/cars/{id}/edit(id=${car.carId})}" method="post" enctype="multipart/form-data">
+
+          <!-- Price -->
+          <div class="form-group">
+            <label class="form-label" for="price">Price (Rs.)</label>
+            <input id="price" name="price" type="number" class="form-control"
+                   step="1000" min="1" th:value="${car.price}" required/>
+            <div class="form-hint">Current price: Rs. <span th:text="${#numbers.formatDecimal(car.price,1,'COMMA',0,'POINT')}">—</span></div>
+          </div>
+
+          <!-- Condition -->
+          <div class="form-group">
+            <label class="form-label" for="condition">Condition</label>
+            <select id="condition" name="condition" class="form-control">
+              <option th:selected="${car.condition == 'New'}"       value="New">🆕 New</option>
+              <option th:selected="${car.condition == 'Excellent'}" value="Excellent">⭐ Excellent</option>
+              <option th:selected="${car.condition == 'Good'}"      value="Good">👍 Good</option>
+              <option th:selected="${car.condition == 'Used'}"      value="Used">🔄 Used</option>
+              <option th:selected="${car.condition == 'Fair'}"      value="Fair">🔶 Fair</option>
+              <option th:selected="${car.condition == 'Certified'}" value="Certified">✅ Certified</option>
+            </select>
+          </div>
+
+          <!-- Mileage (Used Cars only) -->
+          <div class="form-group" th:if="${car.type == 'USED_CAR'}">
+            <label class="form-label" for="mileage">Mileage (km)</label>
+            <input id="mileage" name="mileage" type="number" class="form-control"
+                   min="0" th:value="${car.mileage}" required/>
+          </div>
+
+          <!-- Certified fields -->
+          <div th:if="${car.type == 'CERTIFIED_CAR'}">
+            <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group">
+                <label class="form-label" for="certificationBody">Certification Body</label>
+                <input id="certificationBody" name="certificationBody" type="text"
+                       class="form-control" th:value="${car.certificationBody}" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="warrantyMonths">Warranty (Months)</label>
+                <input id="warrantyMonths" name="warrantyMonths" type="number"
+                       class="form-control" min="0" th:value="${car.warrantyMonths}" required/>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─ Image Upload ─ -->
+          <div class="form-group" style="margin-bottom:0.3rem">
+            <label class="form-label" style="color:var(--text-dim);font-size:0.75rem">Car Image <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          </div>
+
+          <!-- Drag-and-drop upload zone -->
+          <div id="dropZone" class="drop-zone" onclick="document.getElementById('imageFile').click()">
+            <div class="drop-zone-icon">📷</div>
+            <div class="drop-zone-text">Click or drag &amp; drop an image here</div>
+            <div class="drop-zone-sub">JPG, PNG, WebP · Max 10 MB</div>
+            <input id="imageFile" name="imageFile" type="file" accept="image/*"
+                   style="display:none" onchange="onFileSelected(this)"/>
+          </div>
+
+          <!-- Live preview (shown after file selected) -->
+          <div id="imgPreviewWrap" style="display:none;margin-top:0.8rem;margin-bottom:0.3rem">
+            <div style="position:relative;display:inline-block;width:100%">
+              <img id="imgPreview" src="" alt="Car preview"
+                   style="width:100%;max-height:220px;object-fit:cover;border-radius:var(--radius-md);border:1px solid var(--border)"/>
+              <button type="button" onclick="clearImage()"
+                      style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+            <div id="fileNameLabel" style="font-size:0.78rem;color:var(--text-dim);margin-top:0.4rem"></div>
+          </div>
+
+          <!-- Current image preview -->
+          <div id="currentImageWrap" th:if="${car.imageUrl != null and !car.imageUrl.isEmpty()}"
+               style="margin-top:0.8rem;border-radius:var(--radius-md);overflow:hidden;height:140px;border:1px solid var(--border)">
+            <img th:src="${car.imageUrl}" th:alt="${car.brand}"
+                 style="width:100%;height:100%;object-fit:cover"/>
+            <div style="font-size:0.77rem;color:var(--text-dim);margin-top:0.35rem;text-align:center">Current Image</div>
+          </div>
+
+          <!-- Optional URL fallback -->
+          <details style="margin-top:0.6rem;margin-bottom:1rem">
+            <summary style="font-size:0.8rem;color:var(--text-dim);cursor:pointer;user-select:none">Or paste an image URL instead</summary>
+            <div class="form-group" style="margin-top:0.6rem;margin-bottom:0">
+              <input id="imageUrl" name="imageUrl" type="url" class="form-control"
+                     th:value="${car.imageUrl}" placeholder="https://example.com/car-photo.jpg"/>
+            </div>
+          </details>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label" for="description">Description</label>
+            <textarea id="description" name="description" class="form-control"
+                      rows="5" required th:text="${car.description}"></textarea>
+          </div>
+
+          <div class="flex gap-2 mt-2">
+            <a th:href="@{/cars/{id}(id=${car.carId})}" class="btn btn-secondary" style="flex:1">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="flex:2">💾 Save Changes</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Sidebar: current info summary -->
+    <div>
+      <div class="summary-card">
+        <div th:if="${car.type == 'USED_CAR'}"      class="summary-accent summary-accent-gold"></div>
+        <div th:if="${car.type == 'CERTIFIED_CAR'}" class="summary-accent summary-accent-cyan"></div>
+        <div th:if="${car.type != 'USED_CAR' and car.type != 'CERTIFIED_CAR'}" class="summary-accent"></div>
+
+        <div class="summary-body">
+          <div class="summary-title">📊 Current Listing Info</div>
+          <div class="current-price-box">
+            <div class="current-price-label">Current Price</div>
+            <div class="current-price-val" th:text="'Rs. ' + ${#numbers.formatDecimal(car.price,1,'COMMA',0,'POINT')}">—</div>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-row-label">Brand</span>
+            <span class="summary-row-val" th:text="${car.brand}">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">Model</span>
+            <span class="summary-row-val" th:text="${car.model}">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">Year</span>
+            <span class="summary-row-val" th:text="${car.year}">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">Type</span>
+            <span class="summary-row-val" th:text="${car.type == 'USED_CAR'} ? 'Used Car' : (${car.type == 'CERTIFIED_CAR'} ? 'Certified' : 'New Car')">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">Condition</span>
+            <span class="summary-row-val" th:text="${car.condition}">—</span>
+          </div>
+          <div class="summary-row" th:if="${car.type == 'USED_CAR'}">
+            <span class="summary-row-label">Mileage</span>
+            <span class="summary-row-val" th:text="${car.mileage} + ' km'">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning box -->
+      <div class="alert alert-info" style="margin-top:1.2rem">
+        <span>ℹ</span>
+        <span>Brand, model, and year cannot be changed. Delete and re-list to change them.</span>
+      </div>
+
+      <!-- Quick delete -->
+      <div class="glass-card" style="padding:1.2rem;margin-top:1rem">
+        <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.8rem">⚠ Danger Zone</div>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:0.8rem">Permanently remove this listing from CarSale.</p>
+        <form th:action="@{/cars/{id}/delete(id=${car.carId})}" method="post"
+              onsubmit="return confirm('Are you sure you want to delete this listing?')">
+          <button type="submit" class="btn btn-danger btn-full btn-sm">🗑️ Delete Listing</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // ── Drag & Drop ──────────────────────────────────────────────────────────
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('imageFile');
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      showPreview(file);
+    }
+  });
+
+  function onFileSelected(input) {
+    if (input.files && input.files[0]) showPreview(input.files[0]);
+  }
+
+  function showPreview(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imgPreview').src = e.target.result;
+      document.getElementById('imgPreviewWrap').style.display = 'block';
+      document.getElementById('fileNameLabel').textContent =
+        '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      dropZone.style.display = 'none';
+      
+      const currentImg = document.getElementById('currentImageWrap');
+      if (currentImg) currentImg.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearImage() {
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('imgPreviewWrap').style.display = 'none';
+    document.getElementById('fileNameLabel').textContent = '';
+    fileInput.value = '';
+    dropZone.style.display = 'block';
+    
+    const currentImg = document.getElementById('currentImageWrap');
+    if (currentImg) currentImg.style.display = 'block';
+  }
+</script>
+</body>
+</html>
+

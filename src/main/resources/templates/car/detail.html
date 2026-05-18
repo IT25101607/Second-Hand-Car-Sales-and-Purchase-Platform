@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${car.brand} + ' ' + ${car.model} + ' – Second Hand Car Platform'">Car Detail</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    /* Detail layout */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.8rem;
+      align-items: start;
+    }
+
+    /* Hero card */
+    .hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-card-accent {
+      height: 5px;
+      background: var(--grad-btn);
+    }
+    .hero-card-accent-gold { background: var(--grad-gold); }
+    .hero-card-accent-cyan { background: linear-gradient(90deg,#06b6d4,#3b82f6); }
+    .hero-card-body { padding: 2rem; }
+
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .car-big-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0.6rem 0 0.2rem;
+    }
+    .car-big-year { color: var(--text-muted); font-size: 0.9rem; }
+    .car-big-price {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 900;
+      background: var(--grad-btn);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Info chips */
+    .info-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .chip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.9rem;
+      font-size: 0.82rem;
+    }
+    .chip-label { color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .chip-val   { color: var(--text); font-weight: 600; margin-top: 0.1rem; }
+
+    /* Polymorphism box */
+    .poly-box {
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.22);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .poly-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #c4b5fd;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .poly-val {
+      font-family: monospace;
+      font-size: 0.87rem;
+      color: rgba(240,240,248,0.7);
+      word-break: break-all;
+    }
+
+    /* Description */
+    .desc-block h3 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .desc-block p {
+      color: rgba(240,240,248,0.75);
+      line-height: 1.7;
+      font-size: 0.93rem;
+    }
+
+    /* Sidebar cards */
+    .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+
+    .sidebar-card-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .seller-name  { font-size: 1rem; font-weight: 700; }
+    .seller-email { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem; }
+    .seller-phone { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem; }
+
+    /* Rating */
+    .rating-big {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .rating-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fbbf24;
+    }
+    .stars-row { color: #fbbf24; font-size: 1.1rem; letter-spacing: 2px; }
+    .review-count { color: var(--text-muted); font-size: 0.83rem; margin-top: 0.2rem; }
+
+    /* Actions sidebar */
+    .action-stack { display: flex; flex-direction: column; gap: 0.65rem; }
+
+    @media (max-width: 900px) {
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/cars}">← All Listings</a>
+    <a th:href="@{/search}">🔍 Search</a>
+    <a th:href="@{/transactions/history}">📋 Transactions</a>
+    <a th:href="@{/logout}" style="background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);padding:.5rem .9rem;border-radius:8px;text-decoration:none;font-size:.875rem;font-weight:500;">⏻ Logout</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div th:if="${success}" class="alert alert-success"><span>✓</span> <span th:text="${success}"></span></div>
+  <div th:if="${error}"   class="alert alert-error"  ><span>⚠</span> <span th:text="${error}"></span></div>
+
+  <div class="detail-grid">
+
+    <!-- Main Card -->
+    <div>
+      <div class="hero-card">
+        <div th:if="${car.type == 'USED_CAR'}"      class="hero-card-accent hero-card-accent-gold"></div>
+        <div th:if="${car.type == 'CERTIFIED_CAR'}" class="hero-card-accent hero-card-accent-cyan"></div>
+        <div th:if="${car.type != 'USED_CAR' and car.type != 'CERTIFIED_CAR'}" class="hero-card-accent"></div>
+
+        <div class="hero-card-body">
+
+          <!-- Car Image Banner -->
+          <div th:if="${car.imageUrl != null and !car.imageUrl.isEmpty()}"
+               style="margin:-2rem -2rem 1.5rem -2rem;height:240px;overflow:hidden;border-radius:var(--radius-xl) var(--radius-xl) 0 0">
+            <img th:src="${car.imageUrl}" th:alt="${car.brand + ' ' + car.model}"
+                 style="width:100%;height:100%;object-fit:cover"
+                 onerror="this.parentElement.remove()"/>
+          </div>
+          <div th:if="${car.imageUrl == null or car.imageUrl.isEmpty()}"
+               style="margin:-2rem -2rem 1.5rem -2rem;height:200px;overflow:hidden;border-radius:var(--radius-xl) var(--radius-xl) 0 0;background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(6,182,212,0.2));display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Outfit',sans-serif;font-size:5rem;font-weight:900;color:rgba(255,255,255,0.08)"
+                  th:text="${car.brand}">Brand</span>
+          </div>
+
+          <div class="hero-top">
+            <div>
+              <span class="badge badge-used"  th:if="${car.type == 'USED_CAR'}">Used Car</span>
+              <span class="badge badge-cert"  th:if="${car.type == 'CERTIFIED_CAR'}">✓ Certified</span>
+              <span class="badge badge-new"   th:if="${car.type != 'USED_CAR' and car.type != 'CERTIFIED_CAR'}">New Car</span>
+              <div class="car-big-name" th:text="${car.brand} + ' ' + ${car.model}">Car Name</div>
+              <div class="car-big-year" th:text="'Model Year: ' + ${car.year}">Year</div>
+            </div>
+            <div class="car-big-price" th:text="'Rs. ' + ${#numbers.formatDecimal(car.price,1,'COMMA',0,'POINT')}">Price</div>
+          </div>
+
+          <!-- Info chips -->
+          <div class="info-chips">
+            <div class="chip">
+              <div class="chip-label">Car ID</div>
+              <div class="chip-val" th:text="${car.carId}">—</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Condition</div>
+              <div class="chip-val" th:text="${car.condition}">—</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Year</div>
+              <div class="chip-val" th:text="${car.year}">—</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Type</div>
+              <div class="chip-val" th:text="${car.type == 'USED_CAR'} ? 'Used' : (${car.type == 'CERTIFIED_CAR'} ? 'Certified' : 'New')">—</div>
+            </div>
+          </div>
+
+          <hr class="divider"/>
+
+          <!-- Polymorphism display -->
+          <div class="poly-box">
+            <div class="poly-label">🧬 Polymorphic displayInfo()</div>
+            <div class="poly-val" th:text="${car.displayInfo()}">—</div>
+          </div>
+
+          <!-- Description -->
+          <div class="desc-block">
+            <h3>📄 Description</h3>
+            <p th:text="${car.description}">No description provided.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- Seller Card -->
+      <div class="sidebar-card" th:if="${seller != null}">
+        <div class="sidebar-card-title">👤 Seller Information</div>
+        <div class="seller-name"  th:text="${seller.name}">Seller Name</div>
+        <div class="seller-email" th:text="${seller.email}">email@example.com</div>
+        <div class="seller-phone" th:if="${seller.phone != null}" th:text="'📞 ' + ${seller.phone}"></div>
+      </div>
+
+      <!-- Reviews Card -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">⭐ Community Reviews</div>
+        <div class="rating-big">
+          <div class="rating-num" th:text="${#numbers.formatDecimal(avgRating,1,'POINT',1,'POINT')}">0.0</div>
+          <div>
+            <div class="stars-row">★★★★★</div>
+            <div class="review-count" th:text="${reviewCount} + ' review(s)'">0 reviews</div>
+          </div>
+        </div>
+        <a th:href="@{/reviews/car/{id}(id=${car.carId})}" class="btn btn-secondary btn-full">💬 View All Reviews</a>
+      </div>
+
+      <!-- Action Card -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">⚡ Actions</div>
+        <div class="action-stack">
+          <!-- Buy: visible to buyers who don't own it -->
+          <a th:if="${isBuyer}"
+             th:href="@{/transactions/buy/{id}(id=${car.carId})}"
+             class="btn btn-success btn-full">
+            🛒 Buy This Car
+          </a>
+          <!-- Owner actions -->
+          <th:block th:if="${isOwner}">
+            <a th:href="@{/cars/{id}/edit(id=${car.carId})}" class="btn btn-secondary btn-full">✏️ Edit Listing</a>
+            <button class="btn btn-danger btn-full" onclick="document.getElementById('delModal').classList.add('active')">
+              🗑️ Delete Listing
+            </button>
+          </th:block>
+          <a th:href="@{/cars}" class="btn btn-secondary btn-full">← Back to Listings</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal">
+    <div style="font-size:2.5rem;margin-bottom:.8rem">⚠️</div>
+    <h3>Remove Listing?</h3>
+    <p>This will permanently delete this car listing and cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="document.getElementById('delModal').classList.remove('active')">Cancel</button>
+      <form th:action="@{/cars/{id}/delete(id=${car.carId})}" method="post" style="flex:1">
+        <button type="submit" class="btn btn-danger btn-full">Yes, Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+

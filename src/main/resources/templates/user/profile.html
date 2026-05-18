@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile – Second Hand Car Platform</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.8rem;
+      align-items: start;
+    }
+
+    /* Left: Avatar sidebar */
+    .avatar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      text-align: center;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .avatar-ring {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: var(--grad-btn);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 10px 30px rgba(124,58,237,0.4), 0 0 0 4px rgba(124,58,237,0.15);
+      position: relative;
+    }
+
+    .user-display-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .user-email-disp { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem; }
+
+    .avatar-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem; }
+
+    .nav-quick-links {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+    }
+    .quick-link:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+    /* Right: Info card */
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      animation: fadeUp 0.5s 0.08s ease both;
+    }
+    .info-card-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .info-card-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .info-card-body { padding: 2rem; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .info-item {}
+    .info-item-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .info-item-val {
+      font-size: 0.97rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* Polymorphism demo box */
+    .poly-section {
+      margin-top: 1.5rem;
+      padding: 1rem 1.2rem;
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: var(--radius-md);
+    }
+    .poly-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #c4b5fd;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .poly-val { font-family: monospace; font-size: 0.87rem; color: rgba(240,240,248,0.7); }
+
+    @media (max-width: 768px) {
+      .profile-grid { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/profile" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/cars}">🚗 Browse Cars</a>
+    <a th:href="@{/search}">🔍 Search</a>
+    <a th:href="@{/transactions/history}">📋 Transactions</a>
+    <a th:href="@{/logout}" style="background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);padding:.5rem .9rem;border-radius:8px;text-decoration:none;font-size:.875rem;font-weight:500;">⏻ Logout</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div th:if="${success}" class="alert alert-success"><span>✓</span> <span th:text="${success}"></span></div>
+  <div th:if="${error}"   class="alert alert-error"  ><span>⚠</span> <span th:text="${error}"></span></div>
+
+  <div class="profile-grid">
+
+    <!-- Avatar sidebar -->
+    <div class="avatar-card">
+      <div class="avatar-ring">
+        <span th:text="${#strings.substring(user.name,0,1)}">U</span>
+      </div>
+      <div class="user-display-name" th:text="${user.name}">User Name</div>
+      <div class="user-email-disp" th:text="${user.email}">email@example.com</div>
+
+      <span class="badge badge-buyer"  th:if="${user.role == 'BUYER'}">🛒 Buyer</span>
+      <span class="badge badge-seller" th:if="${user.role == 'SELLER'}">🏷️ Seller</span>
+      <span class="badge badge-admin"  th:if="${user.role == 'ADMIN'}">⚙ Admin</span>
+
+      <div class="avatar-actions">
+        <a th:href="@{/profile/edit}" class="btn btn-primary btn-full">✏️ Edit Profile</a>
+        <button class="btn btn-danger btn-full" onclick="document.getElementById('deleteModal').classList.add('active')">
+          🗑️ Delete Account
+        </button>
+      </div>
+
+      <div class="nav-quick-links">
+        <a th:href="@{/cars}" class="quick-link">🚗 Browse Cars</a>
+        <a th:if="${user.role == 'SELLER'}" th:href="@{/cars/my}" class="quick-link">📋 My Listings</a>
+        <a th:if="${user.role == 'SELLER'}" th:href="@{/cars/add}" class="quick-link">＋ Add New Listing</a>
+        <a th:href="@{/transactions/history}" class="quick-link">💳 Transaction History</a>
+        <a th:if="${user.role == 'ADMIN'}" th:href="@{/admin/dashboard}" class="quick-link">⚙ Admin Dashboard</a>
+      </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <h2>Account Information</h2>
+        <a th:href="@{/profile/edit}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+      </div>
+      <div class="info-card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-item-label">User ID</div>
+            <div class="info-item-val" th:text="${user.userId}">—</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Account Type</div>
+            <div class="info-item-val" th:text="${user.role == 'BUYER'} ? 'Car Buyer' : (${user.role == 'SELLER'} ? 'Car Seller' : 'Administrator')">—</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Full Name</div>
+            <div class="info-item-val" th:text="${user.name}">—</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Email Address</div>
+            <div class="info-item-val" th:text="${user.email}">—</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Phone Number</div>
+            <div class="info-item-val" th:text="${user.phone != null ? user.phone : '—'}">—</div>
+          </div>
+        </div>
+
+        <div class="poly-section">
+          <div class="poly-label">🧬 Polymorphic displayInfo()</div>
+          <div class="poly-val" th:text="${user.displayInfo()}">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div style="font-size:2.5rem;margin-bottom:.8rem">⚠️</div>
+    <h3>Delete Account?</h3>
+    <p>This is permanent. All your data, listings, and transactions will be removed from the platform.</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('active')">Cancel</button>
+      <form th:action="@{/profile/delete}" method="post" style="flex:1">
+        <button type="submit" class="btn btn-danger btn-full">Yes, Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
