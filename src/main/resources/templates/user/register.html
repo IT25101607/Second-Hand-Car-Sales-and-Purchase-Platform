@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account – Second Hand Car Platform</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
+
+    .auth-card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem 2.8rem;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .card-header-logo {
+      text-align: center;
+      margin-bottom: 1.8rem;
+    }
+    .logo-mark {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 900;
+      background: var(--grad-btn);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .card-header-logo p { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.25rem; }
+
+    .card-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
+
+    /* Role selector */
+    .role-group { display: flex; gap: 0.75rem; }
+    .role-opt {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+    }
+    .role-opt input[type="radio"] { position:absolute; opacity:0; width:0; height:0; }
+    .role-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.85rem 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      font-size: 0.87rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .role-label .role-emoji { font-size: 1.4rem; }
+    .role-opt input:checked + .role-label {
+      background: rgba(124,58,237,0.18);
+      border-color: rgba(124,58,237,0.5);
+      color: #ddd6fe;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+    .role-label:hover { background: rgba(124,58,237,0.1); color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="auth-card">
+  <div class="card-header-logo">
+    <div class="logo-mark">🚗 SecondHand Cars</div>
+    <p>Your trusted second-hand car marketplace</p>
+  </div>
+
+  <h2 class="card-title">Create Account 🚀</h2>
+
+  <div th:if="${error}"   class="alert alert-error"  ><span>⚠</span> <span th:text="${error}"></span></div>
+  <div th:if="${success}" class="alert alert-success"><span>✓</span> <span th:text="${success}"></span></div>
+
+  <form id="registerForm" th:action="@{/register}" method="post">
+
+    <div class="form-group">
+      <label class="form-label" for="name">Full Name</label>
+      <input id="name" name="name" type="text" class="form-control" placeholder="John Doe" required/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="email">Email Address</label>
+      <input id="email" name="email" type="email" class="form-control" placeholder="john@example.com" required/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="phone">Phone Number</label>
+      <input id="phone" name="phone" type="tel" class="form-control" placeholder="+94 71 234 5678" required/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <input id="password" name="password" type="password" class="form-control" placeholder="Min. 6 characters" required minlength="6"/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">I want to…</label>
+      <div class="role-group">
+        <label class="role-opt">
+          <input type="radio" name="role" value="BUYER" checked/>
+          <span class="role-label">
+            <span class="role-emoji">🛒</span>Buy Cars
+          </span>
+        </label>
+        <label class="role-opt">
+          <input type="radio" name="role" value="SELLER"/>
+          <span class="role-label">
+            <span class="role-emoji">🏷️</span>Sell Cars
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-full" style="margin-top:0.4rem">
+      Create Account →
+    </button>
+  </form>
+
+  <p class="text-center mt-3" style="color:var(--text-dim);font-size:.875rem">
+    Already have an account?
+    <a th:href="@{/login}" style="color:#c4b5fd;text-decoration:none;font-weight:600">Sign in</a>
+  </p>
+</div>
+</body>
+</html>
+

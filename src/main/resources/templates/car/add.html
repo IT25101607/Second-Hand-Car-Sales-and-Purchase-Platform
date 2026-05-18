@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Car Listing – Second Hand Car Platform</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .add-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.8rem;
+      align-items: start;
+    }
+
+    /* ── Type selector ── */
+    .type-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 0.2rem;
+    }
+    .type-opt { position: relative; cursor: pointer; }
+    .type-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .type-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-align: center;
+    }
+    .type-icon { font-size: 1.6rem; }
+    .type-opt input:checked + .type-label {
+      background: rgba(124,58,237,0.18);
+      border-color: rgba(124,58,237,0.55);
+      color: #ddd6fe;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+    .type-opt input:checked + .type-label.used-label   { background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.55); color: #fde68a; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .type-opt input:checked + .type-label.cert-label   { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.5);  color: #6ee7b7; box-shadow: 0 0 0 3px rgba(52,211,153,0.12); }
+    .type-label:hover { background: rgba(124,58,237,0.08); color: var(--text); }
+
+    /* ── Form row ── */
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    /* ── Extra fields ── */
+    .extra-fields {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease;
+      margin-top: 0;
+    }
+    .extra-fields.visible {
+      max-height: 300px;
+      opacity: 1;
+      margin-top: 0.2rem;
+    }
+
+    /* ── Sidebar tips ── */
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .tip-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .tip-item {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      align-items: flex-start;
+    }
+    .tip-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--grad-btn);
+      flex-shrink: 0;
+      margin-top: 0.3rem;
+    }
+    .tip-dot.gold { background: var(--grad-gold); }
+    .tip-dot.cyan { background: linear-gradient(135deg,#06b6d4,#3b82f6); }
+
+    .car-type-info {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      margin-top: 1.2rem;
+      animation: fadeUp 0.5s 0.18s ease both;
+    }
+    .type-info-item {
+      display: none;
+    }
+    .type-info-item.active { display: block; }
+    .type-info-icon { font-size: 2rem; margin-bottom: 0.7rem; }
+    .type-info-title { font-weight: 700; font-size: 0.97rem; margin-bottom: 0.4rem; }
+    .type-info-desc  { font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed rgba(124,58,237,0.4);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: rgba(124,58,237,0.05);
+      margin-bottom: 0.4rem;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: rgba(124,58,237,0.75);
+      background: rgba(124,58,237,0.12);
+    }
+    .drop-zone-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .drop-zone-text { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+    .drop-zone-sub  { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+    @media (max-width: 900px) {
+      .add-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .form-row-2 { grid-template-columns: 1fr; }
+      .type-selector { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/cars/my}">📋 My Listings</a>
+    <a th:href="@{/cars}">All Listings</a>
+    <a th:href="@{/profile}" class="nav-btn-primary" style="background:rgba(124,58,237,0.2);color:#c4b5fd;border:1px solid rgba(124,58,237,0.35);padding:.5rem .9rem;border-radius:8px;text-decoration:none;font-size:.875rem;font-weight:500;">👤 Profile</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="page-header" style="margin-bottom:1.8rem">
+    <h1>🚗 Add New Listing</h1>
+    <p>Fill in the details below to publish your car for sale on our platform.</p>
+  </div>
+
+  <div class="add-grid">
+
+    <!-- Main Form -->
+    <div>
+      <div class="glass-card" style="padding:2rem;animation:fadeUp 0.5s ease both">
+
+        <form th:action="@{/cars/add}" method="post" id="addCarForm" enctype="multipart/form-data">
+
+          <!-- ─ Step 1: Car Type ─ -->
+          <div class="form-group">
+            <label class="form-label">① Listing Type</label>
+            <div class="type-selector">
+              <label class="type-opt">
+                <input type="radio" name="type" value="CAR" checked onchange="onTypeChange('new')"/>
+                <span class="type-label new-label">
+                  <span class="type-icon">🆕</span>New Car
+                </span>
+              </label>
+              <label class="type-opt">
+                <input type="radio" name="type" value="USED_CAR" onchange="onTypeChange('used')"/>
+                <span class="type-label used-label">
+                  <span class="type-icon">🔄</span>Used Car
+                </span>
+              </label>
+              <label class="type-opt">
+                <input type="radio" name="type" value="CERTIFIED_CAR" onchange="onTypeChange('cert')"/>
+                <span class="type-label cert-label">
+                  <span class="type-icon">✅</span>Certified
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <hr class="divider"/>
+
+          <!-- ─ Step 2: Basic Info ─ -->
+          <div class="form-group" style="margin-bottom:0.3rem">
+            <label class="form-label" style="color:var(--text-dim);font-size:0.75rem">② Vehicle Details</label>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="brand">Brand</label>
+              <input id="brand" name="brand" type="text" class="form-control"
+                     placeholder="e.g. Toyota, Honda, BMW" list="brandList" required/>
+              <datalist id="brandList">
+                <option value="Toyota"/><option value="Honda"/><option value="BMW"/>
+                <option value="Mercedes-Benz"/><option value="Nissan"/><option value="Suzuki"/>
+                <option value="Hyundai"/><option value="Kia"/><option value="Mazda"/>
+                <option value="Ford"/><option value="Mitsubishi"/><option value="Audi"/>
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="model2">Model</label>
+              <input id="model2" name="model2" type="text" class="form-control"
+                     placeholder="e.g. Camry, Civic, 3 Series" required/>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="year">Year</label>
+              <input id="year" name="year" type="number" class="form-control"
+                     placeholder="2022" min="1980" max="2026" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="price">Price (Rs.)</label>
+              <input id="price" name="price" type="number" class="form-control"
+                     placeholder="2500000" min="1" step="1000" required/>
+            </div>
+          </div>
+
+          <!-- ─ Extra fields for Used Car ─ -->
+          <div class="extra-fields" id="usedFields">
+            <div class="form-group">
+              <label class="form-label" for="mileage">Mileage (km)</label>
+              <input id="mileage" name="mileage" type="number" class="form-control"
+                     placeholder="e.g. 45000" min="0"/>
+            </div>
+          </div>
+
+          <!-- ─ Extra fields for Certified Car ─ -->
+          <div class="extra-fields" id="certFields">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="certificationBody">Certification Body</label>
+                <input id="certificationBody" name="certificationBody" type="text" class="form-control"
+                       placeholder="e.g. Toyota Certified"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="warrantyMonths">Warranty (Months)</label>
+                <input id="warrantyMonths" name="warrantyMonths" type="number" class="form-control"
+                       placeholder="e.g. 12" min="0"/>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider"/>
+
+          <!-- ─ Step 3: Image Upload ─ -->
+          <div class="form-group" style="margin-bottom:0.3rem">
+            <label class="form-label" style="color:var(--text-dim);font-size:0.75rem">③ Car Image <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          </div>
+
+          <!-- Drag-and-drop upload zone -->
+          <div id="dropZone" class="drop-zone" onclick="document.getElementById('imageFile').click()">
+            <div class="drop-zone-icon">📷</div>
+            <div class="drop-zone-text">Click or drag &amp; drop an image here</div>
+            <div class="drop-zone-sub">JPG, PNG, WebP · Max 10 MB</div>
+            <input id="imageFile" name="imageFile" type="file" accept="image/*"
+                   style="display:none" onchange="onFileSelected(this)"/>
+          </div>
+
+          <!-- Live preview (shown after file selected) -->
+          <div id="imgPreviewWrap" style="display:none;margin-top:0.8rem;margin-bottom:0.3rem">
+            <div style="position:relative;display:inline-block;width:100%">
+              <img id="imgPreview" src="" alt="Car preview"
+                   style="width:100%;max-height:220px;object-fit:cover;border-radius:var(--radius-md);border:1px solid var(--border)"/>
+              <button type="button" onclick="clearImage()"
+                      style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+            <div id="fileNameLabel" style="font-size:0.78rem;color:var(--text-dim);margin-top:0.4rem"></div>
+          </div>
+
+          <!-- Optional URL fallback -->
+          <details style="margin-top:0.6rem">
+            <summary style="font-size:0.8rem;color:var(--text-dim);cursor:pointer;user-select:none">Or paste an image URL instead</summary>
+            <div class="form-group" style="margin-top:0.6rem;margin-bottom:0">
+              <input id="imageUrl" name="imageUrl" type="url" class="form-control"
+                     placeholder="https://example.com/car-photo.jpg"/>
+            </div>
+          </details>
+
+          <hr class="divider"/>
+
+          <!-- ─ Step 4: Description ─ -->
+          <div class="form-group" style="margin-bottom:0.3rem">
+            <label class="form-label" style="color:var(--text-dim);font-size:0.75rem">④ Description</label>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="description">Describe Your Car</label>
+            <textarea id="description" name="description" class="form-control"
+                      rows="5"
+                      placeholder="Describe the car's features, history, condition, extras, service records, any modifications…"
+                      required></textarea>
+          </div>
+
+          <!-- ─ Actions ─ -->
+          <div class="flex gap-2 mt-2">
+            <a th:href="@{/cars}" class="btn btn-secondary" style="flex:1">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="flex:2">🚀 Publish Listing</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <!-- Tips card -->
+      <div class="tip-card">
+        <div class="tip-title">💡 Listing Tips</div>
+        <div class="tip-item">
+          <div class="tip-dot"></div>
+          <span>Use the car's exact brand and model name for better search results.</span>
+        </div>
+        <div class="tip-item">
+          <div class="tip-dot gold"></div>
+          <span>Set a competitive price — check similar listings first.</span>
+        </div>
+        <div class="tip-item">
+          <div class="tip-dot cyan"></div>
+          <span>A detailed description increases buyer confidence and inquiries.</span>
+        </div>
+        <div class="tip-item">
+          <div class="tip-dot"></div>
+          <span>For used cars, honest mileage info builds trust with buyers.</span>
+        </div>
+      </div>
+
+      <!-- Type info card (dynamic) -->
+      <div class="car-type-info">
+        <div class="type-info-item active" id="info-new">
+          <div class="type-info-icon">🆕</div>
+          <div class="type-info-title">New Car Listing</div>
+          <div class="type-info-desc">List a brand-new vehicle. Buyers will expect original factory condition with full warranty.</div>
+        </div>
+        <div class="type-info-item" id="info-used">
+          <div class="type-info-icon">🔄</div>
+          <div class="type-info-title">Used Car Listing</div>
+          <div class="type-info-desc">List a pre-owned vehicle. Include accurate mileage and condition details to attract serious buyers.</div>
+        </div>
+        <div class="type-info-item" id="info-cert">
+          <div class="type-info-icon">✅</div>
+          <div class="type-info-title">Certified Pre-Owned</div>
+          <div class="type-info-desc">A certified car comes with inspection, warranty, and manufacturer backing — the premium used car option.</div>
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="tip-card" style="margin-top:1.2rem">
+        <div class="tip-title">⚡ Quick Links</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem">
+          <a th:href="@{/cars/my}" class="btn btn-secondary btn-sm" style="text-align:center">📋 My Listings</a>
+          <a th:href="@{/cars}"    class="btn btn-secondary btn-sm" style="text-align:center">🚗 Browse All Cars</a>
+          <a th:href="@{/profile}" class="btn btn-secondary btn-sm" style="text-align:center">👤 My Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function onTypeChange(type) {
+    const usedFields = document.getElementById('usedFields');
+    const certFields = document.getElementById('certFields');
+    const mileage    = document.getElementById('mileage');
+    const certBody   = document.getElementById('certificationBody');
+    const warranty   = document.getElementById('warrantyMonths');
+
+    usedFields.classList.remove('visible');
+    certFields.classList.remove('visible');
+    [mileage, certBody, warranty].forEach(el => el.removeAttribute('required'));
+
+    document.querySelectorAll('.type-info-item').forEach(el => el.classList.remove('active'));
+
+    if (type === 'used') {
+      usedFields.classList.add('visible');
+      mileage.setAttribute('required', '');
+      document.getElementById('info-used').classList.add('active');
+    } else if (type === 'cert') {
+      certFields.classList.add('visible');
+      certBody.setAttribute('required', '');
+      warranty.setAttribute('required', '');
+      document.getElementById('info-cert').classList.add('active');
+    } else {
+      document.getElementById('info-new').classList.add('active');
+    }
+  }
+
+  // ── Drag & Drop ──────────────────────────────────────────────────────────
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('imageFile');
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      // Assign to the real input via DataTransfer
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      showPreview(file);
+    }
+  });
+
+  function onFileSelected(input) {
+    if (input.files && input.files[0]) showPreview(input.files[0]);
+  }
+
+  function showPreview(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imgPreview').src = e.target.result;
+      document.getElementById('imgPreviewWrap').style.display = 'block';
+      document.getElementById('fileNameLabel').textContent =
+        '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      dropZone.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearImage() {
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('imgPreviewWrap').style.display = 'none';
+    document.getElementById('fileNameLabel').textContent = '';
+    fileInput.value = '';
+    dropZone.style.display = 'block';
+  }
+</script>
+</body>
+</html>
+

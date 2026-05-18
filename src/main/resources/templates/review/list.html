@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reviews – Second Hand Car Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;
+        background:rgba(255,255,255,.05);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;z-index:10}
+    .nav-brand{font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+    .nav-links{display:flex;gap:.8rem;align-items:center}
+    .nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.88rem;font-weight:500;padding:.45rem 1rem;border-radius:8px;transition:background .2s,color .2s}
+    .nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
+    main{max-width:820px;margin:2.5rem auto;padding:0 1.5rem}
+
+    .alert{padding:.75rem 1rem;border-radius:10px;margin-bottom:1.5rem;font-size:.875rem;font-weight:500}
+    .alert-success{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.3)}
+    .alert-error{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+
+    /* Summary bar */
+    .summary-bar{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:1.5rem 2rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;animation:fadeUp .4s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .car-title{font-size:1.2rem;font-weight:700}
+    .car-sub{font-size:.82rem;color:rgba(255,255,255,.45);margin-top:.2rem}
+    .rating-big{text-align:center}
+    .rating-num{font-size:2.8rem;font-weight:700;color:#a78bfa;line-height:1}
+    .stars-row{font-size:1.2rem;color:#fbbf24;margin:.3rem 0}
+    .rating-count{font-size:.8rem;color:rgba(255,255,255,.45)}
+    .btn-review{padding:.7rem 1.5rem;background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;border-radius:12px;color:#fff;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s}
+    .btn-review:hover{opacity:.88}
+
+    /* Review cards */
+    .review-list{display:flex;flex-direction:column;gap:1rem}
+    .review-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:1.4rem 1.6rem;animation:fadeUp .4s ease;transition:box-shadow .2s}
+    .review-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.28)}
+    .review-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem}
+    .reviewer-info{display:flex;align-items:center;gap:.8rem}
+    .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0}
+    .reviewer-name{font-weight:600;font-size:.92rem}
+    .review-date{font-size:.77rem;color:rgba(255,255,255,.4);margin-top:.15rem}
+    .stars{font-size:1.1rem;color:#fbbf24}
+    .verified-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:999px;font-size:.72rem;font-weight:600;background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.3)}
+
+    /* Polymorphism display box */
+    .poly-box{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.18);border-radius:9px;padding:.55rem .9rem;font-size:.77rem;color:rgba(255,255,255,.5);font-family:monospace;margin:.8rem 0;word-break:break-all}
+    .poly-box strong{color:#c4b5fd;font-family:'Inter',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.2rem}
+
+    .review-comment{font-size:.9rem;color:rgba(255,255,255,.8);line-height:1.6;margin-bottom:.8rem}
+    .review-actions{display:flex;gap:.6rem}
+    .btn-edit{padding:.32rem .8rem;border-radius:8px;background:rgba(96,165,250,.18);color:#93c5fd;text-decoration:none;font-size:.8rem;font-weight:600;transition:background .2s}
+    .btn-edit:hover{background:rgba(96,165,250,.32)}
+    .btn-del{padding:.32rem .8rem;border-radius:8px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.22);cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s}
+    .btn-del:hover{background:rgba(239,68,68,.28)}
+
+    /* Rating bar chart */
+    .rating-bars{margin-bottom:1.5rem}
+    .bar-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem;font-size:.8rem}
+    .bar-label{width:25px;text-align:right;color:rgba(255,255,255,.55)}
+    .bar-track{flex:1;background:rgba(255,255,255,.08);border-radius:999px;height:8px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#a78bfa,#60a5fa);transition:width .4s ease}
+    .bar-count{width:24px;color:rgba(255,255,255,.4)}
+
+    .empty{text-align:center;padding:4rem 0;color:rgba(255,255,255,.3)}
+    .empty p{margin-top:.4rem;font-size:.9rem}
+
+    h1{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/cars/{id}(id=${car.carId})}">← Listing</a>
+    <a th:href="@{/cars}">All Cars</a>
+    <a th:href="@{/profile}">👤 Profile</a>
+  </div>
+</nav>
+<main>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar">
+    <div>
+      <div class="car-title" th:text="${car.brand} + ' ' + ${car.model} + ' (' + ${car.year} + ')'">Car</div>
+      <div class="car-sub" th:text="${reviewCount} + ' review(s)'">Reviews</div>
+    </div>
+    <div class="rating-big">
+      <div class="rating-num" th:text="${#numbers.formatDecimal(avgRating,1,'POINT',1,'POINT')}">0.0</div>
+      <div class="stars-row" th:text="${@reviewHelper.buildStars(avgRating)}">★★★★★</div>
+      <div class="rating-count" th:text="${reviewCount} + ' ratings'">0 ratings</div>
+    </div>
+    <a th:if="${canReview}"
+       th:href="@{/reviews/car/{id}/submit(id=${car.carId})}"
+       class="btn-review">⭐ Write a Review</a>
+    <span th:unless="${canReview}"
+          style="font-size:.82rem;color:rgba(255,255,255,.35)">
+      You've already reviewed this car
+    </span>
+  </div>
+
+  <h1>Customer Reviews</h1>
+
+  <!-- Reviews list -->
+  <div class="review-list" th:if="${!reviews.isEmpty()}">
+    <div class="review-card" th:each="review : ${reviews}">
+      <div class="review-top">
+        <div class="reviewer-info">
+          <div class="avatar" th:text="${#strings.substring(reviewerNames[review.reviewerId],0,1)}">U</div>
+          <div>
+            <div class="reviewer-name" th:text="${reviewerNames[review.reviewerId]}">Reviewer</div>
+            <div class="review-date" th:text="${review.createdAt}">Date</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <span class="stars" th:text="${review.ratingLabel}">★★★★★</span>
+          <span th:if="${review.verified}" class="verified-badge">✔ Verified Purchase</span>
+        </div>
+      </div>
+
+      <div class="review-comment" th:text="${review.comment}">Comment</div>
+
+      <!-- Polymorphism: getDisplayContent() -->
+      <div class="poly-box">
+        <strong>🧬 getDisplayContent() — Polymorphic output</strong>
+        <span th:text="${review.displayContent}">—</span>
+      </div>
+
+      <!-- Owner actions -->
+      <div class="review-actions"
+           th:if="${loggedInUser != null and loggedInUser.userId == review.reviewerId}">
+        <a th:href="@{/reviews/{id}/edit(id=${review.reviewId})}" class="btn-edit">✏️ Edit</a>
+        <form th:action="@{/reviews/{id}/delete(id=${review.reviewId})}" method="post">
+          <button type="submit" class="btn-del"
+                  onclick="return confirm('Delete this review?')">🗑 Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty" th:if="${reviews.isEmpty()}">
+    <div style="font-size:2.5rem">💬</div>
+    <p>No reviews yet. Be the first to review!</p>
+  </div>
+</main>
+</body>
+</html>
+

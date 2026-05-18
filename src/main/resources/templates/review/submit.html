@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Write a Review – Second Hand Car Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;
+        background:rgba(255,255,255,.05);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;z-index:10}
+    .nav-brand{font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+    .nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.88rem;font-weight:500;padding:.45rem 1rem;border-radius:8px;transition:background .2s,color .2s}
+    .nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
+    main{max-width:520px;margin:3rem auto;padding:0 1.5rem}
+    .card{background:rgba(255,255,255,.07);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2.5rem 2.8rem;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:fadeUp .45s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    h1{font-size:1.4rem;font-weight:700;margin-bottom:.3rem}
+    .subtitle{color:rgba(255,255,255,.45);font-size:.85rem;margin-bottom:1.8rem}
+    .car-info{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.22);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.6rem;font-size:.88rem}
+    .car-info strong{color:#c4b5fd;display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+
+    /* Star rating picker */
+    .star-picker{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:.3rem;margin-bottom:1.4rem}
+    .star-picker input{display:none}
+    .star-picker label{font-size:2rem;cursor:pointer;color:rgba(255,255,255,.2);transition:color .15s}
+    .star-picker input:checked ~ label,.star-picker label:hover,.star-picker label:hover ~ label{color:#fbbf24}
+
+    .form-group{margin-bottom:1.2rem}
+    .field-label{display:block;color:rgba(255,255,255,.65);font-size:.82rem;margin-bottom:.4rem;font-weight:500}
+    textarea{width:100%;padding:.75rem 1rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;font-size:.9rem;outline:none;font-family:inherit;resize:vertical;min-height:110px;transition:border-color .25s,box-shadow .25s}
+    textarea::placeholder{color:rgba(255,255,255,.3)}
+    textarea:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.2)}
+    .btn-row{display:flex;gap:1rem}
+    .btn{flex:1;padding:.8rem;border-radius:12px;border:none;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:inline-block}
+    .btn-primary{background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-cancel{background:rgba(255,255,255,.08);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.14)}
+    .btn-cancel:hover{background:rgba(255,255,255,.14);color:#fff}
+    .hint{font-size:.75rem;color:rgba(255,255,255,.35);margin-top:.5rem}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/reviews/car/{id}(id=${car.carId})}">← Reviews</a>
+  </div>
+</nav>
+<main>
+  <div class="card">
+    <h1>⭐ Write a Review</h1>
+    <p class="subtitle">Share your experience with this car.</p>
+
+    <div class="car-info">
+      <strong>Reviewing</strong>
+      <span th:text="${car.brand} + ' ' + ${car.model} + ' (' + ${car.year} + ')'">Car</span>
+    </div>
+
+    <form th:action="@{/reviews/car/{id}/submit(id=${car.carId})}" method="post">
+
+      <div class="form-group">
+        <label class="field-label">Your Rating</label>
+        <div class="star-picker">
+          <input type="radio" id="s5" name="rating" value="5"/><label for="s5" title="5">★</label>
+          <input type="radio" id="s4" name="rating" value="4"/><label for="s4" title="4">★</label>
+          <input type="radio" id="s3" name="rating" value="3" checked/><label for="s3" title="3">★</label>
+          <input type="radio" id="s2" name="rating" value="2"/><label for="s2" title="2">★</label>
+          <input type="radio" id="s1" name="rating" value="1"/><label for="s1" title="1">★</label>
+        </div>
+        <p class="hint">Click a star to select your rating (1 = Poor, 5 = Excellent)</p>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label" for="comment">Your Review</label>
+        <textarea id="comment" name="comment" required minlength="10"
+                  placeholder="Describe your experience with this car…"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <a th:href="@{/reviews/car/{id}(id=${car.carId})}" class="btn btn-cancel">Cancel</a>
+        <button type="submit" class="btn btn-primary">Submit Review</button>
+      </div>
+    </form>
+  </div>
+</main>
+</body>
+</html>
+

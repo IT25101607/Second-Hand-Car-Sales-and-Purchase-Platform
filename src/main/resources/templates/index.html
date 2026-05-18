@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Second Hand Car Platform – Sri Lanka's most trusted platform to buy and sell second-hand cars."/>
+  <title>Second Hand Car Sale &amp; Purchase Platform – Buy &amp; Sell Used Cars</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    /* ── Hero ── */
+    .hero-section {
+      min-height: calc(100vh - 68px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated ring behind hero */
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      border: 1px solid rgba(124,58,237,0.18);
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      animation: ringPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      border: 1px solid rgba(6,182,212,0.14);
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      animation: ringPulse 4s ease-in-out infinite reverse;
+      pointer-events: none;
+    }
+    @keyframes ringPulse {
+      0%,100%{transform:translate(-50%,-50%) scale(1); opacity:0.6}
+      50%    {transform:translate(-50%,-50%) scale(1.08); opacity:0.3}
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1.2rem;
+      border-radius: 999px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.35);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #c4b5fd;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1.8rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-pill::before { content:'✦'; font-size:0.7rem; }
+
+    .hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.55s 0.08s ease both;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-title .grad-text {
+      background: var(--grad-btn);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      animation: fadeUp 0.55s 0.15s ease both;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.55s 0.22s ease both;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 4rem;
+      position: relative;
+      z-index: 2;
+      animation: fadeUp 0.55s 0.3s ease both;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--grad-btn);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+    /* ── Features ── */
+    .features-section {
+      padding: 5rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #c4b5fd;
+      margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.6rem;
+    }
+    .section-desc { color: var(--text-muted); max-width: 500px; line-height: 1.6; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-glow), var(--shadow-md);
+      background: var(--bg-card-hover);
+      border-color: rgba(124,58,237,0.3);
+    }
+
+    .f-icon-wrap {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.3rem;
+      font-size: 1.4rem;
+    }
+    .icon-purple { background: rgba(124,58,237,0.2); }
+    .icon-cyan   { background: rgba(6,182,212,0.2); }
+    .icon-gold   { background: rgba(245,158,11,0.2); }
+    .icon-green  { background: rgba(52,211,153,0.2); }
+
+    .f-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; }
+    .f-desc  { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── CTA Banner ── */
+    .cta-banner {
+      margin: 0 1.5rem 5rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 3rem 2.5rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(6,182,212,0.15));
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .cta-banner h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .cta-banner p { color: var(--text-muted); margin-top: 0.4rem; }
+
+    @media (max-width: 768px) {
+      .hero-section::before, .hero-section::after { display: none; }
+      .stats-row { gap: 1.5rem; }
+      .cta-banner { text-align: center; justify-content: center; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="nav-brand">🚗 SecondHand Cars</a>
+    <div class="nav-links">
+      <th:block th:if="${loggedInUser == null}">
+        <a th:href="@{/login}">Sign In</a>
+        <a th:href="@{/register}" class="btn btn-primary btn-sm">Get Started →</a>
+      </th:block>
+      <th:block th:if="${loggedInUser != null}">
+        <a th:href="@{/cars}">Browse Cars</a>
+        <a th:href="@{/search}">Search</a>
+        <a th:if="${loggedInUser.role == 'ADMIN'}" th:href="@{/admin/dashboard}" class="nav-btn-danger" style="background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);padding:.5rem .9rem;border-radius:8px;text-decoration:none;font-size:.875rem;font-weight:500;">⚙ Admin</a>
+        <a th:if="${loggedInUser.role == 'SELLER'}" th:href="@{/cars/my}">My Garage</a>
+        <a th:href="@{/profile}" class="nav-btn-primary" style="background:rgba(124,58,237,0.2);color:#c4b5fd;border:1px solid rgba(124,58,237,0.35);padding:.5rem .9rem;border-radius:8px;text-decoration:none;font-size:.875rem;font-weight:500;">👤 Profile</a>
+      </th:block>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero-section">
+    <div class="hero-pill">✦ Second Hand Car Sale &amp; Purchase Platform</div>
+    <h1 class="hero-title">
+      Second-Hand Cars<br/>
+      <span class="grad-text">Buy &amp; Sell Smart.</span>
+    </h1>
+    <p class="hero-sub">
+      A modern second-hand car platform with verified listings, secure transactions, 
+      and a community you can trust. Find your perfect ride today.
+    </p>
+    <div class="hero-cta">
+      <a th:href="@{/cars}" class="btn btn-primary btn-lg">Browse All Cars →</a>
+      <th:block th:if="${loggedInUser == null}">
+        <a th:href="@{/register}" class="btn btn-secondary btn-lg">Join Free</a>
+      </th:block>
+      <th:block th:if="${loggedInUser != null}">
+        <a th:href="@{/search}" class="btn btn-secondary btn-lg">Advanced Search</a>
+      </th:block>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Listed Cars</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">1.2K</div>
+        <div class="stat-label">Happy Users</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">98%</div>
+        <div class="stat-label">Satisfaction</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section">
+    <div class="section-tag">✦ Platform Features</div>
+    <h2 class="section-title">Everything you need to trade smarter</h2>
+    <p class="section-desc">Built with a robust OOP architecture—polymorphic filters, verified reviews, and real-time transactions all in one place.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="f-icon-wrap icon-purple">⚡</div>
+        <div class="f-title">Advanced Filtering</div>
+        <p class="f-desc">Polymorphic composite filters let you find exactly what you need by brand, model, year, condition, and price.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon-wrap icon-cyan">🛡️</div>
+        <div class="f-title">Secure Transactions</div>
+        <p class="f-desc">Direct buyer-to-seller approval workflows ensure complete transparency and smooth deal closures.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon-wrap icon-gold">⭐</div>
+        <div class="f-title">Verified Reviews</div>
+        <p class="f-desc">Our community-driven rating system highlights reviews from actual verified purchasers you can trust.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon-wrap icon-green">🔖</div>
+        <div class="f-title">Saved Preferences</div>
+        <p class="f-desc">Save your search criteria and revisit them instantly—never lose track of your favourite filters.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <div class="cta-banner" th:if="${loggedInUser == null}">
+    <div>
+      <h2>Ready to find your perfect second-hand car?</h2>
+      <p>Join thousands of buyers and sellers on the Second Hand Car Sale &amp; Purchase Platform today.</p>
+    </div>
+    <a th:href="@{/register}" class="btn btn-primary btn-lg">Create Free Account →</a>
+  </div>
+
+</body>
+</html>
+

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Listings – Second Hand Car Platform</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    /* ── Page specific ── */
+    .page-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 0.7rem;
+      flex: 1;
+      min-width: 260px;
+      max-width: 520px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 0.72rem 1.1rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text);
+      font-size: 0.93rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-input::placeholder { color: var(--text-dim); }
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+    }
+
+    .result-stats {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .result-stats strong { color: var(--text); }
+
+    /* ── Car Grid ── */
+    .car-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .car-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      animation: fadeUp 0.45s ease both;
+    }
+    .car-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.45), var(--shadow-glow);
+      border-color: rgba(124,58,237,0.3);
+    }
+
+    /* Top accent bar */
+    .card-accent {
+      height: 4px;
+      background: var(--grad-btn);
+    }
+    .card-accent-gold { background: var(--grad-gold); }
+    .card-accent-cyan { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+
+    .card-inner { padding: 1.4rem; }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-title-row { margin-bottom: 0.4rem; }
+    .car-name { font-size: 1.1rem; font-weight: 700; }
+    .car-year { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    .card-price {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--grad-btn);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0.8rem 0 0.5rem;
+    }
+
+    .card-condition {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-desc {
+      font-size: 0.84rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 1.1rem;
+    }
+
+    .card-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+
+    /* ── Car Image ── */
+    .card-img-wrap {
+      width: 100%;
+      height: 170px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .car-card:hover .card-img { transform: scale(1.05); }
+
+    .card-img-placeholder {
+      width: 100%;
+      height: 170px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(6,182,212,0.15));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: -0.02em;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 6rem 2rem;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state h3 { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .empty-state p  { font-size: 0.9rem; }
+
+    @media (max-width: 640px) {
+      .car-grid { grid-template-columns: 1fr; }
+      .page-toolbar { flex-direction: column; align-items: stretch; }
+      .search-bar { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/profile}">👤 Profile</a>
+    <a th:href="@{/search}">🔍 Search</a>
+    <a th:href="@{/transactions/history}">📋 Transactions</a>
+    <a th:href="@{/cars/my}">My Garage</a>
+    <a th:href="@{/cars/add}" class="btn btn-primary btn-sm">＋ Add Listing</a>
+    <a th:href="@{/logout}" class="nav-btn-danger" style="background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);padding:.5rem .9rem;border-radius:8px;text-decoration:none;font-size:.875rem;font-weight:500;">⏻ Logout</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <div th:if="${success}" class="alert alert-success"><span>✓</span> <span th:text="${success}"></span></div>
+  <div th:if="${error}"   class="alert alert-error"  ><span>⚠</span> <span th:text="${error}"></span></div>
+
+  <!-- Toolbar -->
+  <div class="page-toolbar">
+    <div class="page-header" style="margin:0">
+      <h1>Browse Cars</h1>
+      <p>Find your perfect vehicle from verified listings</p>
+    </div>
+    <form th:action="@{/cars}" method="get" class="search-bar">
+      <input id="searchInput" name="q" type="text" class="search-input"
+             th:value="${keyword}" placeholder="Search brand, model…"/>
+      <button type="submit" class="btn btn-primary">🔍</button>
+    </form>
+  </div>
+
+  <p class="result-stats">
+    Showing <strong th:text="${cars.size()}">0</strong> listing(s)
+    <span th:if="${keyword != null and !keyword.isEmpty()}" th:text="' for &quot;' + ${keyword} + '&quot;'"></span>
+  </p>
+
+  <!-- Grid -->
+  <div class="car-grid" th:if="${!cars.isEmpty()}">
+    <div class="car-card" th:each="car : ${cars}">
+      <!-- Accent bar by type -->
+      <div th:if="${car.type == 'USED_CAR'}"      class="card-accent card-accent-gold"></div>
+      <div th:if="${car.type == 'CERTIFIED_CAR'}" class="card-accent card-accent-cyan"></div>
+      <div th:if="${car.type != 'USED_CAR' and car.type != 'CERTIFIED_CAR'}" class="card-accent"></div>
+
+      <!-- Car Image -->
+      <div class="card-img-wrap">
+        <!-- If imageUrl is set, try to load it; on error swap to placeholder -->
+        <th:block th:if="${car.imageUrl != null and !car.imageUrl.isEmpty()}">
+          <img th:src="${car.imageUrl}"
+               th:alt="${car.brand + ' ' + car.model}"
+               class="card-img"
+               th:id="'img-' + ${car.carId}"
+               onerror="this.style.display='none'; document.getElementById('ph-'+this.id.substring(4)).style.display='flex';"/>
+          <div th:id="'ph-' + ${car.carId}"
+               class="card-img-placeholder" style="display:none;height:100%">
+            <span th:text="${car.brand.substring(0,1)}">C</span>
+          </div>
+        </th:block>
+        <!-- No image: show placeholder directly -->
+        <th:block th:if="${car.imageUrl == null or car.imageUrl.isEmpty()}">
+          <div class="card-img-placeholder" style="height:100%">
+            <span th:text="${car.brand.substring(0,1)}">C</span>
+          </div>
+        </th:block>
+      </div>
+
+      <div class="card-inner">
+        <div class="card-meta">
+          <span class="badge badge-used"  th:if="${car.type == 'USED_CAR'}">Used</span>
+          <span class="badge badge-cert"  th:if="${car.type == 'CERTIFIED_CAR'}">✓ Certified</span>
+          <span class="badge badge-new"   th:if="${car.type != 'USED_CAR' and car.type != 'CERTIFIED_CAR'}">New</span>
+        </div>
+
+        <div class="car-name" th:text="${car.brand} + ' ' + ${car.model}">Brand Model</div>
+        <div class="car-year" th:text="'Year ' + ${car.year}">Year</div>
+
+        <div class="card-price" th:text="'Rs. ' + ${#numbers.formatDecimal(car.price,1,'COMMA',0,'POINT')}">Price</div>
+
+        <div class="card-condition">
+          <span>📌</span> <span th:text="${car.condition}">Condition</span>
+        </div>
+
+        <div class="card-desc" th:text="${car.description}">Description</div>
+
+        <div class="card-footer">
+          <a th:href="@{/cars/{id}(id=${car.carId})}" class="btn btn-primary btn-full">
+            View Details →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" th:if="${cars.isEmpty()}">
+    <div class="empty-icon">🚗</div>
+    <h3>No listings found</h3>
+    <p>Try adjusting your search or be the first to add a listing!</p>
+    <a th:href="@{/cars/add}" class="btn btn-primary" style="margin-top:1.5rem">+ Add First Listing</a>
+  </div>
+
+</div>
+</body>
+</html>
+

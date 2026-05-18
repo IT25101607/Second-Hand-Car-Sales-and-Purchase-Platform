@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction History – Second Hand Car Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;
+        background:rgba(255,255,255,.05);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;z-index:10}
+    .nav-brand{font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+    .nav-links{display:flex;gap:.8rem;align-items:center}
+    .nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.88rem;font-weight:500;padding:.45rem 1rem;border-radius:8px;transition:background .2s,color .2s}
+    .nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
+    .btn-approvals{background:rgba(167,139,250,.2)!important;color:#c4b5fd!important;border:1px solid rgba(167,139,250,.3)!important}
+    main{max-width:980px;margin:2.5rem auto;padding:0 1.5rem}
+    h1{font-size:1.5rem;font-weight:700;margin-bottom:.3rem}
+    .subtitle{color:rgba(255,255,255,.45);font-size:.85rem;margin-bottom:1.8rem}
+    .alert{padding:.75rem 1rem;border-radius:10px;margin-bottom:1.5rem;font-size:.875rem;font-weight:500}
+    .alert-success{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.3)}
+    .alert-error{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+    .badge{display:inline-block;padding:.22rem .75rem;border-radius:999px;font-size:.75rem;font-weight:600;text-transform:uppercase}
+    .badge-pending{background:rgba(251,191,36,.2);color:#fde68a;border:1px solid rgba(251,191,36,.3)}
+    .badge-approved{background:rgba(52,211,153,.2);color:#6ee7b7;border:1px solid rgba(52,211,153,.3)}
+    .badge-rejected{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+    .txn-list{display:flex;flex-direction:column;gap:1rem}
+    .txn-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:1.4rem 1.6rem;display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start;animation:fadeUp .4s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .txn-top{display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem;flex-wrap:wrap}
+    .txn-id{font-size:.75rem;color:rgba(255,255,255,.35);font-family:monospace}
+    .txn-date{font-size:.78rem;color:rgba(255,255,255,.4)}
+    .txn-title{font-size:1rem;font-weight:700;margin-bottom:.7rem}
+    .txn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;margin-bottom:.8rem}
+    .info-item label{font-size:.72rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.2rem}
+    .info-item p{font-size:.88rem;font-weight:500}
+    .amount{color:#a78bfa;font-weight:700;font-size:1.1rem}
+    .poly-box{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:9px;padding:.65rem 1rem;font-size:.78rem;color:rgba(255,255,255,.55);font-family:monospace;margin-bottom:.8rem;word-break:break-all}
+    .poly-box strong{color:#c4b5fd;font-family:'Inter',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.25rem}
+    .txn-msg{font-size:.83rem;color:rgba(255,255,255,.55);background:rgba(255,255,255,.05);border-radius:8px;padding:.6rem .9rem;margin-bottom:.8rem}
+    .txn-msg strong{color:rgba(255,255,255,.7);display:block;margin-bottom:.2rem;font-size:.75rem;text-transform:uppercase}
+    .txn-actions{display:flex;flex-direction:column;gap:.5rem;align-items:flex-end}
+    .btn-del{padding:.38rem .9rem;border-radius:9px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s}
+    .btn-del:hover{background:rgba(239,68,68,.28)}
+    .link-car{color:#a78bfa;font-size:.8rem;text-decoration:none;white-space:nowrap}
+    .link-car:hover{text-decoration:underline}
+    .empty{text-align:center;padding:5rem 0;color:rgba(255,255,255,.3)}
+    .empty p{margin-top:.4rem;font-size:.9rem}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/cars" class="nav-brand">🚗 SecondHand Cars</a>
+  <div class="nav-links">
+    <a th:href="@{/cars}">🚗 Listings</a>
+    <a th:if="${role == 'SELLER'}" th:href="@{/transactions/approvals}" class="btn-approvals">⏳ Pending Approvals</a>
+    <a th:href="@{/profile}">👤 Profile</a>
+  </div>
+</nav>
+<main>
+  <h1 th:text="${role == 'SELLER'} ? '💼 My Sales History' : '🛒 My Purchase History'">History</h1>
+  <p class="subtitle" th:text="${transactions.size()} + ' transaction(s)'">0</p>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+  <div class="txn-list" th:if="${!transactions.isEmpty()}">
+    <div class="txn-card" th:each="txn : ${transactions}">
+      <div>
+        <div class="txn-top">
+          <span class="badge" th:classappend="${txn.statusBadgeClass}" th:text="${txn.status}">Status</span>
+          <span class="txn-id" th:text="'#' + ${txn.txnId}">ID</span>
+          <span class="txn-date" th:text="${txn.createdAt}">Date</span>
+        </div>
+        <div class="txn-title" th:with="car=${carMap[txn.carId]}"
+             th:text="${car != null} ? (${car.brand} + ' ' + ${car.model} + ' (' + ${car.year} + ')') : 'Car #' + ${txn.carId}">Car</div>
+        <div class="txn-grid">
+          <div class="info-item"><label>Amount</label>
+            <p class="amount" th:text="'$' + ${#numbers.formatDecimal(txn.amount,1,'COMMA',2,'POINT')}">$0</p></div>
+          <div class="info-item" th:if="${role == 'SELLER'}"><label>Buyer</label><p th:text="${txn.buyerId}">—</p></div>
+          <div class="info-item" th:if="${role == 'BUYER'}"><label>Seller</label><p th:text="${txn.sellerId}">—</p></div>
+          <div class="info-item"><label>Type</label>
+            <p th:text="${txn.type == 'APPROVED_TXN'} ? 'Completed Deal' : 'Purchase Request'">—</p></div>
+        </div>
+        <div class="poly-box">
+          <strong>🧬 getSummary() — Polymorphic output</strong>
+          <span th:text="${txn.summary}">—</span>
+        </div>
+        <div class="txn-msg" th:if="${txn.message != null and !txn.message.isBlank()}">
+          <strong>Message</strong><span th:text="${txn.message}">—</span>
+        </div>
+      </div>
+      <div class="txn-actions">
+        <form th:action="@{/transactions/{id}/delete(id=${txn.txnId})}" method="post">
+          <button type="submit" class="btn-del" onclick="return confirm('Remove?')">🗑 Remove</button>
+        </form>
+        <a th:if="${carMap[txn.carId] != null}" th:href="@{/cars/{id}(id=${txn.carId})}" class="link-car">View Car →</a>
+      </div>
+    </div>
+  </div>
+  <div class="empty" th:if="${transactions.isEmpty()}">
+    <div style="font-size:2.8rem">📭</div><p>No transactions yet.</p>
+  </div>
+</main>
+</body>
+</html>
+
